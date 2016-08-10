@@ -14,6 +14,14 @@ body #content {
 	padding: 25px;
 }
 
+#title {
+	text-align: center;
+	font-size: 16pt;
+	border: 1px solid #006699;
+	padding: 1px;
+	font-style: italic;
+}
+
 .datagrid table {
     border-collapse: collapse;
     text-align: left;
@@ -63,28 +71,14 @@ body #content {
 .datagrid table tbody tr:last-child td {
     border-bottom: none;
 }
-.datagrid table tfoot td div {
+.datagrid table tfoot td {
     border-top: 1px solid #006699;
     background: #E1EEf4;
-}
-.datagrid table tfoot td {
-    padding: 0;
-    font-size: 12px
-}
-.datagrid table tfoot td div {
-    padding: 2px;
-}
-.datagrid table tfoot td ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    text-align: right;
-}
-.datagrid table tfoot li {
-    display: inline;
+		font-weight: bold;
 }
 
-.datagrid .ftControl  {
+.ftControl  {
+		text-align: right;
     text-decoration: none;
     display: inline-block;
     padding: 2px 8px;
