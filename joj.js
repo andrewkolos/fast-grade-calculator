@@ -13,12 +13,12 @@ window.onload = function() {
     addItem.onclick = insertRow;
     var gradesGrid = $("#gradesGrid")[0];
 
+		// wire up showMoreInfo checkbox
     var showMoreInfo = document.getElementById("showMoreInfo");
     showMoreInfo.onclick = function() {
-        updateMoreInfo(true)
+        updateMoreInfo(true);
     };
-    showMoreInfo.onclick();
-
+    showMoreInfo.onclick(); // update html to reflect default state
 
     initEditables(); // makes the spans containing the numbers be able to turn into inputs on focus
 
@@ -35,7 +35,7 @@ window.onload = function() {
 
 // Adds editing functionality to any spans with the editable classname.
 // On focus, an editable span will be reaplaced with a text input initialized
-// with the value of the span. On blur, the text input will be replaced with 
+// with the value of the span. On blur, the text input will be replaced with
 // the hidden span, updated with the new value.
 // Note that these spans cannot be edited to be an empty string.
 function initEditables() {
@@ -49,15 +49,16 @@ function initEditables() {
 
                 text = span.textContent; // retrieve text
 
+								// build input element
                 input = document.createElement("input");
                 input.type = "text";
                 input.value = span.textContent;
                 input.size = Math.max(text.length / 2, 2);
 
                 span.parentNode.insertBefore(input, span);
-                //input.focus();
                 input.select();
-
+								
+								// restore plain text upon input losing focus
                 input.onblur = function() {
                     span.parentNode.removeChild(input);
                     if (input.value !== "") // edit to empty string will be ignored
@@ -72,6 +73,7 @@ function initEditables() {
     }
 }
 
+// show or hide name column based on argued checkbox's checked value
 function toggleNameColumn(cb) {
     var table = document.getElementById("mainTable");
     var rowCount = table.rows.length;
@@ -189,24 +191,24 @@ function updateMoreInfo(redraw) {
         if (document.getElementById("showMoreInfo").checked) {
             $migw.animate({
                 "max-height": gradesGrid.offsetHeight + "px"
-            }, 200); // nasty dependence on gradesGrid height here
+            }, 100); // nasty dependence on gradesGrid height here
             $moreInfo.css("visibility", "visible");
             $moreInfo.css("opacity", "0.0").animate({
                 opacity: 1.0
-            }, 200);
+            }, 100);
             $migd.css("visibility", "visible");
             $migd.css("opacity", "0.0").animate({
                 opacity: 1.0
-            }, 200);
+            }, 100);
         } else {
             $moreInfo.animate({
                 opacity: 0.0
-            }, 200, function() {
+            }, 100, function() {
                 $moreInfo.css("visibility", "hidden");
             });
             $migd.animate({
                 opacity: 0.0
-            }, 200, function() {
+            }, 100, function() {
                 $migd.css("visibility", "hidden");
             });
             $migw.animate({
