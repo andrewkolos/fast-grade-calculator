@@ -1,18 +1,31 @@
+function record(name, grade, weight) {
+	this.name = name;
+	this.grade = grade;
+	this.weight = weight;
+}
+
+var records = [];
+
 // wire up events
 window.onload = function() {
 	var addItem = document.getElementById("addItem");
 	addItem.onclick = insertRow;
+	var gradesGrid = $("#gradesGrid")[0];
+	
+	var showMoreInfo = document.getElementById("showMoreInfo");
+	showMoreInfo.onclick = function() { updateMoreInfo(true) };
+	showMoreInfo.onclick();
+	
 	
 	initEditables(); // makes the spans containing the numbers be able to turn into inputs on focus
 	
-	for (var i = 0; i < 5; i++) // lets throw some more rows in by default
+	for (var i = 0; i < 4; i++) // lets throw some more rows in by default
 		insertRow();
 	
-	// wire the show name column checkbox
+	/*// wire the show name column checkbox
 	var showNames = document.getElementById("showNames");
 	showNames.onclick = function() { toggleNameColumn(showNames); };
-	
-	toggleNameColumn(showNames); // and update the form with its default value
+	toggleNameColumn(showNames); // and update the form with its default value */
 	
 	focusFirstCell(); // set focus to first cell of the table
 }
@@ -36,7 +49,7 @@ function initEditables() {
 				input = document.createElement("input");
 				input.type = "text";
 				input.value = span.textContent;
-				input.size = text.length / 2;
+				input.size = Math.max(text.length / 2, 2);
 				
 				span.parentNode.insertBefore(input, span);
 				//input.focus();
@@ -48,6 +61,7 @@ function initEditables() {
 						span.textContent = input.value;
 					span.style.display = "";
 					updateGrade();
+					updateMoreInfo(false);
 				}
 			}
 		}
@@ -74,12 +88,17 @@ function updateGrade() {
 	var table = document.getElementById("mainTable");
 	var totalEarnedLabel = document.getElementById("totalEarned");
 	var totalPossibleLabel = document.getElementById("totalPossible");
+	records = [];
 	
 	// TODO eww literals. find a more elegant solution.
-	for (var i = 1; i < table.rows.length-1; i++) { 
+	for (var i = 1; i < table.rows.length-1; i++) {
 		var cells = table.rows[i].cells;
+		var name = cells[0].getElementsByTagName("span")[0].textContent;
 		var score = parseFloat(cells[1].getElementsByTagName("span")[0].textContent) / 100.0;
 		var weight = parseFloat(cells[2].getElementsByTagName("span")[0].textContent);
+		var rec = new record(name, score, weight);
+		if (weight > 0.0)
+			records.push(rec);
 		var earned = (weight*1.0*score);
 		totalEarned = totalEarned + earned;
 		totalWeight = totalWeight + weight;
@@ -94,14 +113,87 @@ function updateGrade() {
 	
 	if (!Number.isNaN(grade)) {
 		gradeLabel.textContent = "Current grade: " + displayedGrade;
-		document.getElementById("warningLabel").style.visibility = totalWeight == 100 ? "hidden" : "";
+		$warningLabel = $("#warningLabel");
+		
+		// if the total of the assignment weights do not sum to 100, notify user
+		
+		if (totalWeight == 100) // hide label
+			$warningLabel.animate({opacity: 0.0}, 200, function() {$warningLabel.css("visibility", "hidden");});
+		else { 
+			// animate showing of label if not already visible
+			if ($warningLabel.css("visibility") == "hidden") {
+				$warningLabel.css({visibility:"visible", opacity: 0.0}).animate({opacity: 1.0}, 200);
+				$warningLabel.css("color", "red");
+				setTimeout(function() {$warningLabel.css("color", "darkred")}, 200);
+			}
+		}
+		//document.getElementById("warningLabel").style.if ()totalWeight == 100 ? "hidden" : "";
 	}
 }
 
+function updateMoreInfo(redraw) {
+		var moreInfoGridRows = document.getElementById("moreInfoGrid").getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+		var earned = 0.0;
+		var possible = 0.0;
+		$.each(records, function(ind, rec) {
+				earned += rec.grade * rec.weight;
+				possible += rec.weight;
+		});
+	
+		for (var i = 0; i < moreInfoGridRows.length; ) {
+			moreInfoGridRows[i].outerHTML = "";
+		}
+	
+		$.each(records, function(rowIndex, r) { 
+			var row = $("<tr/>");
+			if ((rowIndex % 2) == 1)
+				row.addClass("alt");
+				row.append($("<td />").text(r.name));
+				row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.9).toFixed(2)));
+				row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.8).toFixed(2)));
+				row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.7).toFixed(2)));
+				row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.6).toFixed(2)));
+				row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.5).toFixed(2)));
+				$("#moreInfoGrid tbody").append(row);
+		});
+	
+		if (redraw) {
+		var moreInfo = document.getElementById("moreInfoGrid");
+		var $moreInfo = $("#moreInfoGrid")
+		var $migw = $("#moreInfoGridWrapper");
+		var $migd = $("#moreInfoGridDesc");
+		if (document.getElementById("showMoreInfo").checked) {
+			$migw.animate({"max-height" : gradesGrid.offsetHeight + "px"}, 200); // nasty dependence on gradesGrid height here
+			$moreInfo.css("visibility", "visible");
+			$moreInfo.css("opacity", "0.0").animate({opacity: 1.0}, 200);
+			$migd.css("visibility", "visible");
+			$migd.css("opacity", "0.0").animate({opacity: 1.0}, 200);
+		}
+		else {
+			$moreInfo.animate({opacity: 0.0}, 200, function() {$moreInfo.css("visibility", "hidden");});
+			$migd.animate({opacity: 0.0}, 200, function() {$migd.css("visibility", "hidden");});
+			$migw.animate({"max-height" : "0px"}, 0);
+		}
+		}
+}
+
+function neededGrade(grade, weight, totalEarned, totalPossible, desired){
+	var earned = totalEarned - (grade * weight);
+	var possible = totalPossible-weight;
+	
+	console.log("earned: " + earned + " possible: " + possible );
+	return ((desired-earned/100)/weight)*10000;
+}
+
 function insertRow() {
+	
+	$("#moreInfoGrid tbody").append
 	var table = document.getElementById("mainTable");
 	var new_row = table.rows[table.rows.length-3].cloneNode(true); // bad
+	new_row.cells[0].getElementsByTagName("span")[0].textContent = "Assignment " + (table.rows.length-1);
 	table.getElementsByTagName("tbody")[0].appendChild(new_row);
+	table.getElementsBy
+	
 	initEditables(); // eww
 }
 

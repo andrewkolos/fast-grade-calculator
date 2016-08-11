@@ -1,92 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>Fast Grade Calculator</title>
-		<link rel="stylesheet" type="text/css" href="joj.css">
-			<script src="joj.js"> </script>
-		</head>
-		<body>
-			<div id="content">
-				<p id="title">
-				Fast Grade Calculator
+  <head>
+    <title>Fast Grade Calculator</title>
+    <link rel="stylesheet" type="text/css" href="joj.css">
+    <script src="lib/jquery-3.1.0.min.js"></script>
+    <script src="joj.js"></script>
+  </head>
+  <body>
+    <div id="content">
+      <p id="title">
+        Fast Grade Calculator
+      </p>
+      <p id="instructions">
+        <strong> Instructions: </strong> type stuff and press tab
+      </p>
+      <p id="warningLabel">
+        Weights do not add up to 100%
+      </p>
+      <p id="gradeLabel"> Current grade:
+      </p>
+      <div style="text-align: right">
+        <a href="#" class="ftControl" id="addItem" tabindex="1">
+        <span>Add Item</span>
+        </a>
+      </div>
+      <div class="datagrid" id="gradesGrid">
+        <table id="mainTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Grade</th>
+              <th>Weight</th>
+              <th>Earned %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="editable" tabindex="0">Assignment 1</span>
+              </td>
+              <td>
+                <span class="editable" tabindex="0">0.0</span>%
+              </td>
+              <td>
+                <span class="editable" tabindex="0">0.0</span>%
+              </td>
+              <td>0.00</td>
+            </tr>
+            <tr class="alt">
+              <td>
+                <span class="editable" tabindex="0">Assignment 2</span>
+              </td>
+              <td>
+                <span class="editable" tabindex="0">0.0</span>%
+              </td>
+              <td>
+                <span class="editable" tabindex="0">0.0</span>%
+              </td>
+              <td>0.00</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td> 
+                <span id="totalPossible">0.0%</span>
+              </td>
+              <td>
+                <span id="totalEarned">
+                0.0%</span>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="controlBox">
+        <!--<label>
+        <input type="checkbox" id="showNames"> Show Name column </label>-->
+        <label>
+        <input type="checkbox" id="showMoreInfo"> More information
+        </label>
+      </div>
+      <div id="moreInfoGridWrapper">
+				<p id="moreInfoGridDesc">This shows what individual grades would be needed on assignments to achieve each letter grade.
 				</p>
-
-				<p id="instructions">
-					<strong> Instructions: </strong> type stuff and press tab
-				</p>
-
-				<br/>
-
-				<p id="warningLabel" style="color: darkred; visibility: hidden">
-			Weights do not add up to 100%
-				</p>
-
-				<p id="gradeLabel"> Current grade:
-				</p>
-
-				<div style="text-align: right">
-					<a href="#" class="ftControl" id="addItem" tabindex="1">
-						<span>Add Item</span>
-					</a>
-				</div>
-
-				<div class="datagrid">
-					<table id="mainTable">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Grade</th>
-								<th>Weight</th>
-								<th>Earned %</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>
-									<span class="editable" tabindex="0">Name</span>
-								</td>
-								<td>
-									<span class="editable" tabindex="0">0.0</span>%
-								</td>
-								<td>
-									<span class="editable" tabindex="0">0.0</span>%
-								</td>
-								<td>0.00</td>
-							</tr>
-							<tr class="alt">
-								<td>
-									<span class="editable" tabindex="0">Name</span>
-								</td>
-								<td>
-									<span class="editable" tabindex="0">0.0</span>%
-								</td>
-								<td>
-									<span class="editable" tabindex="0">0.0</span>%
-								</td>
-								<td>0.00</td>
-							</tr>
-						</tbody>
-						<tfoot>
-							<tr>
-								<td>
-								</td>
-								<td>
-								</td>
-								<td> 
-									<span id="totalPossible">0.0%</span>
-								</td>
-								<td>
-									<span id="totalEarned">
-									0.0%</span>
-								</td>
-							</tr>
-						</tfoot>
-					</table>
-				</div>
-				<label>
-					<input type="checkbox" id="showNames"> Show Name column </label>
-					<br>
-					</div>
-					<!--end content-->
-				</body>
-			</html>
+        <div class="datagrid" id="moreInfoGrid">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>A</th>
+                <th>B</th>
+                <th>C</th>
+                <th>D</th>
+                <th>F</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>data</td>
+                <td>data</td>
+                <td>data</td>
+                <td>data</td>
+                <td>data</td>
+                <td>data</td>
+              </tr>
+              <tr class="alt">
+                <td>data</td>
+                <td>data</td>
+                <td>data</td>
+                <td>data</td>
+                <td>data</td>
+                <td>data</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!--end content-->
+  </body>
+</html>
