@@ -9,7 +9,7 @@ var records = [];
 
 // wire up events
 window.onload = function() {
-    var addItem = document.getElementById("addItem");
+    var addItem = $("#addItem")[0];
     addItem.onclick = insertRow;
     var gradesGrid = $("#gradesGrid")[0];
 
@@ -197,9 +197,9 @@ function updateMoreInfo(redraw) {
                 opacity: 1.0
             }, 100);
             $migd.css("visibility", "visible");
-            $migd.css("opacity", "0.0").animate({
+            $migd.css("opacity", "0.0").delay(300).animate({
                 opacity: 1.0
-            }, 100);
+            }, 200);
         } else {
             $moreInfo.animate({
                 opacity: 0.0
