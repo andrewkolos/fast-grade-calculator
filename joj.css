@@ -2,6 +2,11 @@ html {
 	background: #fafafa;
 }
 
+p {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
 body #content {
 	font-family: Arial, Helvetica, sans-serif;
 	margin-left: auto;
@@ -44,8 +49,14 @@ body #content {
 }
 
 #moreInfoGridWrapper {
-	transition: all 0.5s linear;
+	transition: all 0.3s linear;
 	overflow: hidden;
+	margin-top: 20px;
+	max-height: 0px;
+}
+
+#moreInfoGridDesc{
+	opacity: 0.0;
 }
 
 .datagrid table {
@@ -137,7 +148,12 @@ body #content {
 }
 #gradesGrid.datagrid table tfoot td {
     border-top: 1px solid #006699;
-    background: #E1EEf4;
+    background: #a3cbdc;
+		font-weight: bold;
+}
+#moreInfoGrid.datagrid table tfoot td {
+    border-top: 1px solid #36752D;
+    background: #b5ffb3;
 		font-weight: bold;
 }
 
@@ -170,8 +186,8 @@ body #content {
 	transform: translateY(1px);
 }
 
-.datagrid table tfoot ul.active,
-.datagrid table tfoot ul a:hover {
+#gradesGrid.datagrid table tfoot ul.active,
+#gradesGrid.datagrid table tfoot ul a:hover {
     text-decoration: none;
     border-color: #00557F;
     color: #FFFFFF;
