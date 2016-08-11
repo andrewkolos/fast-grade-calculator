@@ -1,33 +1,36 @@
 function record(name, grade, weight) {
-	this.name = name;
-	this.grade = grade;
-	this.weight = weight;
+    this.name = name;
+    this.grade = grade;
+    this.weight = weight;
 }
 
+// vector of record objects updated whenever grade is calculated
 var records = [];
 
 // wire up events
 window.onload = function() {
-	var addItem = document.getElementById("addItem");
-	addItem.onclick = insertRow;
-	var gradesGrid = $("#gradesGrid")[0];
-	
-	var showMoreInfo = document.getElementById("showMoreInfo");
-	showMoreInfo.onclick = function() { updateMoreInfo(true) };
-	showMoreInfo.onclick();
-	
-	
-	initEditables(); // makes the spans containing the numbers be able to turn into inputs on focus
-	
-	for (var i = 0; i < 4; i++) // lets throw some more rows in by default
-		insertRow();
-	
-	/*// wire the show name column checkbox
-	var showNames = document.getElementById("showNames");
-	showNames.onclick = function() { toggleNameColumn(showNames); };
-	toggleNameColumn(showNames); // and update the form with its default value */
-	
-	focusFirstCell(); // set focus to first cell of the table
+    var addItem = document.getElementById("addItem");
+    addItem.onclick = insertRow;
+    var gradesGrid = $("#gradesGrid")[0];
+
+    var showMoreInfo = document.getElementById("showMoreInfo");
+    showMoreInfo.onclick = function() {
+        updateMoreInfo(true)
+    };
+    showMoreInfo.onclick();
+
+
+    initEditables(); // makes the spans containing the numbers be able to turn into inputs on focus
+
+    for (var i = 0; i < 4; i++) // add some more rows
+        insertRow();
+
+    /*// wire the show name column checkbox
+    var showNames = document.getElementById("showNames");
+    showNames.onclick = function() { toggleNameColumn(showNames); };
+    toggleNameColumn(showNames); // and update the form with its default value */
+
+    focusFirstCell(); // set focus to first cell of the table
 }
 
 // Adds editing functionality to any spans with the editable classname.
@@ -36,171 +39,207 @@ window.onload = function() {
 // the hidden span, updated with the new value.
 // Note that these spans cannot be edited to be an empty string.
 function initEditables() {
-	var editables = document.getElementsByClassName("editable"); // IE9+
-	for (var i = 0; i < editables.length; i++) {
-		editables[i].onfocus = function(event) {
-			var span, input, text;
-			span = event.target;
-			if (span && span.tagName.toUpperCase() === "SPAN") {
-				span.style.display = "none"; // hide
-				
-				text = span.textContent; // retrieve text
-				
-				input = document.createElement("input");
-				input.type = "text";
-				input.value = span.textContent;
-				input.size = Math.max(text.length / 2, 2);
-				
-				span.parentNode.insertBefore(input, span);
-				//input.focus();
-				input.select();
-				
-				input.onblur = function() {
-					span.parentNode.removeChild(input);
-					if (input.value !== "") // edit to empty string will be ignored
-						span.textContent = input.value;
-					span.style.display = "";
-					updateGrade();
-					updateMoreInfo(false);
-				}
-			}
-		}
-	}
+    var editables = document.getElementsByClassName("editable"); // IE9+
+    for (var i = 0; i < editables.length; i++) {
+        editables[i].onfocus = function(event) {
+            var span, input, text;
+            span = event.target;
+            if (span && span.tagName.toUpperCase() === "SPAN") {
+                span.style.display = "none"; // hide
+
+                text = span.textContent; // retrieve text
+
+                input = document.createElement("input");
+                input.type = "text";
+                input.value = span.textContent;
+                input.size = Math.max(text.length / 2, 2);
+
+                span.parentNode.insertBefore(input, span);
+                //input.focus();
+                input.select();
+
+                input.onblur = function() {
+                    span.parentNode.removeChild(input);
+                    if (input.value !== "") // edit to empty string will be ignored
+                        span.textContent = input.value;
+                    span.style.display = "";
+
+                    updateGrade();
+                    updateMoreInfo(false);
+                }
+            }
+        }
+    }
 }
 
 function toggleNameColumn(cb) {
-	var table = document.getElementById("mainTable");
-	var rowCount = table.rows.length;
-	var footer = table.rows[rowCount-1];
-	var cspan = footer.cells[0].colSpan;
-	
-	for (var i = 0; i < rowCount; i++) {
-		table.rows[i].cells[0].style.display = cb.checked ? "" : "none";
-	}
-	//footer.cells[0].colSpan = cb.checked ? cspan + 1 : cspan - 1;
-	focusFirstCell();
+    var table = document.getElementById("mainTable");
+    var rowCount = table.rows.length;
+    var footer = table.rows[rowCount - 1];
+    var cspan = footer.cells[0].colSpan;
+
+    for (var i = 0; i < rowCount; i++) {
+        table.rows[i].cells[0].style.display = cb.checked ? "" : "none";
+    }
+    //footer.cells[0].colSpan = cb.checked ? cspan + 1 : cspan - 1;
+    focusFirstCell();
 }
 
+// 1. update record vector
+//			note that only entries with nonzero weight are stored
+// 2. update gradesGrid and current grade
 function updateGrade() {
-	var totalEarned = 0.0;
-	var totalWeight = 0.0;
-	var gradeLabel = document.getElementById("gradeLabel");
-	var table = document.getElementById("mainTable");
-	var totalEarnedLabel = document.getElementById("totalEarned");
-	var totalPossibleLabel = document.getElementById("totalPossible");
-	records = [];
-	
-	// TODO eww literals. find a more elegant solution.
-	for (var i = 1; i < table.rows.length-1; i++) {
-		var cells = table.rows[i].cells;
-		var name = cells[0].getElementsByTagName("span")[0].textContent;
-		var score = parseFloat(cells[1].getElementsByTagName("span")[0].textContent) / 100.0;
-		var weight = parseFloat(cells[2].getElementsByTagName("span")[0].textContent);
-		var rec = new record(name, score, weight);
-		if (weight > 0.0)
-			records.push(rec);
-		var earned = (weight*1.0*score);
-		totalEarned = totalEarned + earned;
-		totalWeight = totalWeight + weight;
-		cells[3].textContent = earned.toFixed(2);
-	}
-	
-	var grade = (totalEarned*1.0/totalWeight*100);
-	
-	displayedGrade = grade.toFixed(2);
-	totalEarnedLabel.textContent = totalEarned.toFixed(2);
-	totalPossibleLabel.textContent = totalWeight.toFixed(2);
-	
-	if (!Number.isNaN(grade)) {
-		gradeLabel.textContent = "Current grade: " + displayedGrade;
-		$warningLabel = $("#warningLabel");
-		
-		// if the total of the assignment weights do not sum to 100, notify user
-		
-		if (totalWeight == 100) // hide label
-			$warningLabel.animate({opacity: 0.0}, 200, function() {$warningLabel.css("visibility", "hidden");});
-		else { 
-			// animate showing of label if not already visible
-			if ($warningLabel.css("visibility") == "hidden") {
-				$warningLabel.css({visibility:"visible", opacity: 0.0}).animate({opacity: 1.0}, 200);
-				$warningLabel.css("color", "red");
-				setTimeout(function() {$warningLabel.css("color", "darkred")}, 200);
-			}
-		}
-		//document.getElementById("warningLabel").style.if ()totalWeight == 100 ? "hidden" : "";
-	}
+    var totalEarned = 0.0;
+    var totalWeight = 0.0;
+    var gradeLabel = document.getElementById("gradeLabel");
+    var table = document.getElementById("mainTable");
+    var totalEarnedLabel = document.getElementById("totalEarned");
+    var totalPossibleLabel = document.getElementById("totalPossible");
+
+    records = []; // clear records vector for rebuilding
+
+    // there is probably a more elegant way to access elements
+    for (var i = 1; i < table.rows.length - 1; i++) {
+        var cells = table.rows[i].cells;
+        var name = $(cells[0]).find("span").text();
+        var score = parseFloat($(cells[1]).find("span").text()) / 100.0;
+        var weight = parseFloat($(cells[2]).find("span").text());
+        var rec = new record(name, score, weight);
+        if (weight > 0.0)
+            records.push(rec);
+        var earned = (weight * 1.0 * score);
+        totalEarned = totalEarned + earned;
+        totalWeight = totalWeight + weight;
+        cells[3].textContent = earned.toFixed(2);
+    }
+
+    var grade = (totalEarned * 1.0 / totalWeight * 100); // overall grade
+
+    var displayedGrade = grade.toFixed(2);
+    totalEarnedLabel.textContent = totalEarned.toFixed(2);
+    totalPossibleLabel.textContent = totalWeight.toFixed(2);
+
+    if (!Number.isNaN(grade)) {
+        gradeLabel.textContent = "Current grade: " + displayedGrade + "%";
+        $warningLabel = $("#warningLabel");
+
+        // if the total of the assignment weights do not sum to 100, notify user
+
+        if (totalWeight == 100) // hide label
+            $warningLabel.animate({
+            opacity: 0.0
+        }, 200, function() {
+            $warningLabel.css("visibility", "hidden");
+        });
+        else {
+            // animate showing of label if not already visible
+            if ($warningLabel.css("visibility") == "hidden") {
+                $warningLabel.css({
+                    visibility: "visible",
+                    opacity: 0.0
+                }).animate({
+                    opacity: 1.0
+                }, 200);
+                $warningLabel.css("color", "red");
+                setTimeout(function() {
+                    $warningLabel.css("color", "darkred")
+                }, 200);
+            }
+        }
+        //document.getElementById("warningLabel").style.if ()totalWeight == 100 ? "hidden" : "";
+    }
 }
 
+// make sure to call updateGrade() first
 function updateMoreInfo(redraw) {
-		var moreInfoGridRows = document.getElementById("moreInfoGrid").getElementsByTagName("tbody")[0].getElementsByTagName("tr");
-		var earned = 0.0;
-		var possible = 0.0;
-		$.each(records, function(ind, rec) {
-				earned += rec.grade * rec.weight;
-				possible += rec.weight;
-		});
-	
-		for (var i = 0; i < moreInfoGridRows.length; ) {
-			moreInfoGridRows[i].outerHTML = "";
-		}
-	
-		$.each(records, function(rowIndex, r) { 
-			var row = $("<tr/>");
-			if ((rowIndex % 2) == 1)
-				row.addClass("alt");
-				row.append($("<td />").text(r.name));
-				row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.9).toFixed(2)));
-				row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.8).toFixed(2)));
-				row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.7).toFixed(2)));
-				row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.6).toFixed(2)));
-				row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.5).toFixed(2)));
-				$("#moreInfoGrid tbody").append(row);
-		});
-	
-		if (redraw) {
-		var moreInfo = document.getElementById("moreInfoGrid");
-		var $moreInfo = $("#moreInfoGrid")
-		var $migw = $("#moreInfoGridWrapper");
-		var $migd = $("#moreInfoGridDesc");
-		if (document.getElementById("showMoreInfo").checked) {
-			$migw.animate({"max-height" : gradesGrid.offsetHeight + "px"}, 200); // nasty dependence on gradesGrid height here
-			$moreInfo.css("visibility", "visible");
-			$moreInfo.css("opacity", "0.0").animate({opacity: 1.0}, 200);
-			$migd.css("visibility", "visible");
-			$migd.css("opacity", "0.0").animate({opacity: 1.0}, 200);
-		}
-		else {
-			$moreInfo.animate({opacity: 0.0}, 200, function() {$moreInfo.css("visibility", "hidden");});
-			$migd.animate({opacity: 0.0}, 200, function() {$migd.css("visibility", "hidden");});
-			$migw.animate({"max-height" : "0px"}, 0);
-		}
-		}
+    // clear the moreInfo table before rebuilding it
+    var moreInfoGridRows = document.getElementById("moreInfoGrid").getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+    for (var i = 0; i < moreInfoGridRows.length;)
+        moreInfoGridRows[i].outerHTML = "";
+
+    // determine total of earned and possible points
+    var earned = 0.0;
+    var possible = 0.0;
+    $.each(records, function(ind, rec) {
+        earned += rec.grade * rec.weight;
+        possible += rec.weight;
+    });
+
+    // build the table
+    $.each(records, function(rowIndex, r) {
+        var row = $("<tr/>");
+        if ((rowIndex % 2) == 1)
+            row.addClass("alt");
+        row.append($("<td />").text(r.name));
+        row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.9).toFixed(2)));
+        row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.8).toFixed(2)));
+        row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.7).toFixed(2)));
+        row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.6).toFixed(2)));
+        row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.5).toFixed(2)));
+        $("#moreInfoGrid tbody").append(row);
+    });
+
+		// redraw table if desired
+    if (redraw) {
+        var moreInfo = document.getElementById("moreInfoGrid");
+        var $moreInfo = $("#moreInfoGrid")
+        var $migw = $("#moreInfoGridWrapper");
+        var $migd = $("#moreInfoGridDesc");
+        if (document.getElementById("showMoreInfo").checked) {
+            $migw.animate({
+                "max-height": gradesGrid.offsetHeight + "px"
+            }, 200); // nasty dependence on gradesGrid height here
+            $moreInfo.css("visibility", "visible");
+            $moreInfo.css("opacity", "0.0").animate({
+                opacity: 1.0
+            }, 200);
+            $migd.css("visibility", "visible");
+            $migd.css("opacity", "0.0").animate({
+                opacity: 1.0
+            }, 200);
+        } else {
+            $moreInfo.animate({
+                opacity: 0.0
+            }, 200, function() {
+                $moreInfo.css("visibility", "hidden");
+            });
+            $migd.animate({
+                opacity: 0.0
+            }, 200, function() {
+                $migd.css("visibility", "hidden");
+            });
+            $migw.animate({
+                "max-height": "0px"
+            }, 0);
+        }
+    }
 }
 
-function neededGrade(grade, weight, totalEarned, totalPossible, desired){
-	var earned = totalEarned - (grade * weight);
-	var possible = totalPossible-weight;
-	
-	console.log("earned: " + earned + " possible: " + possible );
-	return ((desired-earned/100)/weight)*10000;
+function neededGrade(grade, weight, totalEarned, totalPossible, desired) {
+    var earned = totalEarned - (grade * weight);
+    var possible = totalPossible - weight;
+
+    console.log("earned: " + earned + " possible: " + possible);
+    return ((desired - earned / 100) / weight) * 10000;
 }
 
 function insertRow() {
-	
-	$("#moreInfoGrid tbody").append
-	var table = document.getElementById("mainTable");
-	var new_row = table.rows[table.rows.length-3].cloneNode(true); // bad
-	new_row.cells[0].getElementsByTagName("span")[0].textContent = "Assignment " + (table.rows.length-1);
-	table.getElementsByTagName("tbody")[0].appendChild(new_row);
-	table.getElementsBy
-	
-	initEditables(); // eww
+    $("#moreInfoGrid tbody").append
+    var table = document.getElementById("mainTable");
+    var new_row = table.rows[table.rows.length - 3].cloneNode(true); // bad
+    new_row.cells[0].getElementsByTagName("span")[0].textContent = "Assignment " + (table.rows.length - 1);
+    table.getElementsByTagName("tbody")[0].appendChild(new_row);
+    table.getElementsBy
+
+    initEditables(); // wire editables in new row
 }
 
+// focuses first cell in gradesGrid
 function focusFirstCell() {
-	var nameCell = document.getElementById("mainTable").rows[1].cells[0];
-	if (nameCell.style.display != "none")
-		nameCell.getElementsByTagName("span")[0].focus();
-	else
-		document.getElementById("mainTable").rows[1].cells[1].getElementsByTagName("span")[0].focus();
+    var nameCell = document.getElementById("mainTable").rows[1].cells[0];
+    if (nameCell.style.display != "none")
+        nameCell.getElementsByTagName("span")[0].focus();
+    else
+        document.getElementById("mainTable").rows[1].cells[1].getElementsByTagName("span")[0].focus();
 }

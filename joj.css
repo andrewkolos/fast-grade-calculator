@@ -22,10 +22,25 @@ body #content {
 	font-style: italic;
 }
 
+#instructions {
+	margin-bottom: 10px;
+}
+
 #warningLabel {
 	color: blue;
 	visibility: hidden;
 	transition: color 0.2 ease;
+	margin-bottom: 5px;
+	margin-top: 20px;
+}
+
+#gradeLabel {
+	margin-top: 0px;
+	margin-bottom: 5px;
+}
+
+#gradeLabel, #warningLabel {
+	text-align: center;
 }
 
 #moreInfoGridWrapper {
@@ -94,7 +109,7 @@ body #content {
     border-left: 1px solid #E1EEF4;
     font-size: 12px;
     font-weight: normal;
-		height: 20px;
+		height: 21px;
 }
 
 #moreInfoGrid.datagrid table tbody td {
