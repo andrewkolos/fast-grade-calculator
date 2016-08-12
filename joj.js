@@ -9,6 +9,41 @@ var records = [];
 
 // wire up events
 window.onload = function() {
+		
+		// Save Cookie button
+		var $cookieButton = $("#saveCookie");
+		if (Cookies.enabled) {
+			$cookieButton.on("click", function() {saveCookie()});
+		}
+		else {
+			$cookieButton.css("opacity", "0.2");
+		}
+		
+		// Load table if cookie exists
+		if (Cookies.enabled && Cookies.get("records") !== undefined) {
+			var json_str = Cookies.get("records");
+			records = JSON.parse(json_str);
+			console.log(records);
+			$("#gradesGrid tbody tr").remove();
+			
+			$.each(records, function(rowIndex, r) {
+				var row = $("<tr />");
+				if ((rowIndex % 2 ) == 1)
+					row.addClass("alt");
+				
+				row.append($("<td />").append(createEditable(r.name)));
+		row.append($("<td />").append(createEditable(r.grade*100)).append("%"));
+		row.append($("<td />").append(createEditable(r.weight)).append("%"));
+				row.append($("<td />").text("0.00"));
+				$("#gradesGrid tbody").append(row);
+			});
+			
+			insertRow();
+			insertRow();
+			
+			updateGrade();
+		}
+		
     var addItem = $("#addItem")[0];
     addItem.onclick = insertRow;
     var gradesGrid = $("#gradesGrid")[0];
@@ -26,8 +61,9 @@ window.onload = function() {
 
     initEditables(); // makes the spans containing the numbers be able to turn into inputs on focus
 
-    for (var i = 0; i < 3; i++) // add some more rows
-        insertRow();
+		if (!Cookies.enabled)
+			for (var i = 0; i < 3; i++) // add some more rows
+					insertRow();
 
     /*// wire the show name column checkbox
     var showNames = document.getElementById("showNames");
@@ -35,6 +71,31 @@ window.onload = function() {
     toggleNameColumn(showNames); // and update the form with its default value */
 
     focusFirstCell(); // set focus to first cell of the table
+}
+
+function saveCookie() {
+	if (Cookies.enabled) {
+		var $saveLabel = $("#saveSuccess");
+		var json_str = JSON.stringify(records);
+		Cookies.set("records", json_str, {expires: 2592000}); // one month
+		$saveLabel.css({
+			visibility: "visible",
+			opacity: 0.0
+		}).animate({
+			opacity: 1.0
+		}, 200);
+		$saveLabel.css("color", "green");
+		setTimeout(function() {
+			$saveLabel.css("color", "darkgreen")
+		}, 200);
+		setTimeout(function() {
+			$saveLabel.animate({
+				opacity: 0.0
+			}, 1000, function () {
+				$saveLabel.css("visibility", "hidden");
+			})
+		}, 400);
+	}
 }
 
 // Adds editing functionality to any spans with the editable classname.
@@ -155,7 +216,6 @@ function updateGrade() {
                 }, 200);
             }
         }
-        //document.getElementById("warningLabel").style.if ()totalWeight == 100 ? "hidden" : "";
     }
 }
 
@@ -259,7 +319,6 @@ function neededGrade(grade, weight, totalEarned, totalPossible, desired) {
     var earned = totalEarned - (grade * weight);
     var possible = totalPossible - weight;
 
-    console.log("earned: " + earned + " possible: " + possible);
     return ((desired - earned / 100) / weight) * 10000;
 }
 
@@ -271,9 +330,9 @@ function insertRow() {
 		if (nrows % 2 === 1)
 			row.addClass("alt");
 		
-		row.append($("<td />").append($("<span />").addClass("editable").text("Assignment " + (nrows - 1)).attr("tabindex", "0")));
-		row.append($("<td />").append($("<span />").addClass("editable").text("0.0%").attr("tabindex", "0")));
-		row.append($("<td />").append($("<span />").addClass("editable").text("0.0%").attr("tabindex", "0")));
+		row.append($("<td />").append(createEditable("Assignment " + (nrows - 1))));
+		row.append($("<td />").append(createEditable("0.0")).append("%"));
+		row.append($("<td />").append(createEditable("0.0")).append("%"));
 		row.append($("<td />").text("0.00"));
 		$("#gradesGrid tbody").append(row);
 		initEditables();
@@ -312,3 +371,7 @@ var getUrlParameter = function getUrlParameter(sParam) {
         }
     }
 };
+
+function createEditable(text) {
+	return $("<span />").addClass("editable").text(text).attr("tabindex", "0");
+}

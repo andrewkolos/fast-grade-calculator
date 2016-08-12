@@ -41,11 +41,41 @@ body #content {
 
 #gradeLabel {
 	margin-top: 0px;
-	margin-bottom: 5px;
+	margin-bottom: 15px;
 }
 
 #gradeLabel, #warningLabel {
 	text-align: center;
+}
+
+#saveSuccess {
+	color: darkgreen;
+	visibility: hidden;
+	display: inline-block;
+	float: left;
+	transition: color 0.2 ease;
+	margin: 6px 12px;
+}
+
+.controls {
+	width: 100%;
+	overflow: hidden;
+}
+
+#bottomControls {
+	margin-top: 10px;
+}
+
+#bookControls {
+	float:right;
+}
+
+#addItem {
+	float:right;
+}
+
+#saveCookie {
+	float:left;
 }
 
 #moreInfoGridWrapper {
@@ -53,6 +83,7 @@ body #content {
 	overflow: hidden;
 	margin-top: 20px;
 	max-height: 0px;
+	border-top: 1px solid gray;
 }
 
 #moreInfoGridDesc{
