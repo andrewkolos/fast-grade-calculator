@@ -1,3 +1,4 @@
+// prototype that represents a row in the gradesGrid
 function record(name, grade, weight) {
     this.name = name;
     this.grade = grade;
@@ -6,48 +7,53 @@ function record(name, grade, weight) {
 
 // vector of record objects updated whenever grade is calculated
 var records = [];
+var cstring = "records";
+var minStartingRows = 5;
 
 // wire up events
 window.onload = function() {
+		var cookie = Cookies.get(cstring);
+	
 		// Load table if cookie exists
-		if (Cookies.enabled && Cookies.get("records") !== undefined) {
-			var json_str = Cookies.get("records");
+		if (Cookies.enabled && cookie !== undefined) {
+			var json_str = cookie;
 			records = JSON.parse(json_str);
 			$("#gradesGrid tbody tr").remove();
 			
+			// build gradesGrid from cookie
 			$.each(records, function(rowIndex, r) {
 				var row = $("<tr />");
 				if ((rowIndex % 2 ) == 1)
 					row.addClass("alt");
 				
 				row.append($("<td />").append(createEditable(r.name)));
-		row.append($("<td />").append(createEditable(r.grade*100)).append("%"));
-		row.append($("<td />").append(createEditable(r.weight)).append("%"));
+				row.append($("<td />").append(createEditable(r.grade*100)).append("%"));
+				row.append($("<td />").append(createEditable(r.weight)).append("%"));
 				row.append($("<td />").text("0.00"));
 				$("#gradesGrid tbody").append(row);
 			});
-			
 			updateGrade();
 		} // end cookie
 		
+		// wire the clear button
 		$("#clearTable").on("click", function(){
 			records = [];
 			$("#gradesGrid tbody tr").remove();
 			updateGrade();
-			while ($("#gradesGrid tbody tr").length < 5)
-				insertRow();
 			focusFirstCell();
 		});
 		
+		// wire Add Item button
     var addItem = $("#addItem")[0];
     addItem.onclick = insertRow;
-    var gradesGrid = $("#gradesGrid")[0];
-
+		
     // wire up showMoreInfo checkbox
     var showMoreInfo = document.getElementById("showMoreInfo");
     showMoreInfo.onclick = function() {
         updateMoreInfo(true, true);
     }
+		
+		// click it if requested by 'more' parameter in URL
     var more = getUrlParameter("more");
 		if (more !== undefined)
 			showMoreInfo.click();
@@ -56,13 +62,9 @@ window.onload = function() {
 
     initEditables(); // makes the spans containing the numbers be able to turn into inputs on focus
 
-		while ($("#gradesGrid tbody tr").length < 5)
+		// make sure we have some rows for the user to start with
+		while ($("#gradesGrid tbody tr").length < minStartingRows)
 			insertRow();
-
-    /*// wire the show name column checkbox
-    var showNames = document.getElementById("showNames");
-    showNames.onclick = function() { toggleNameColumn(showNames); };
-    toggleNameColumn(showNames); // and update the form with its default value */
 
     focusFirstCell(); // set focus to first cell of the table
 }
@@ -71,7 +73,7 @@ function saveCookie() {
 	if (Cookies.enabled) {
 		var $saveLabel = $("#saveSuccess");
 		var json_str = JSON.stringify(records);
-		Cookies.set("records", json_str, {expires: 2592000}); // one month
+		Cookies.set(cstring, json_str, {expires: 5256000}); // two months
 		$saveLabel.css({
 			visibility: "visible",
 			opacity: 0.0
@@ -159,7 +161,6 @@ function updateGrade() {
     var totalEarnedLabel = document.getElementById("totalEarned");
     var totalPossibleLabel = document.getElementById("totalPossible");
 
-
     records = []; // clear records vector for rebuilding
 
     // there is probably a more elegant way to access elements
@@ -243,18 +244,14 @@ function updateMoreInfo(redraw, fade) {
     // build the table
     $.each(records, function(rowIndex, r) {
         var row = $("<tr/>");
-
+				var temp = 0.0;
 
         if ((rowIndex % 2) == 1)
             row.addClass("alt");
         row.append($("<td />").text(r.name));
-        row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.9).toFixed(2)));
-        row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.8).toFixed(2)));
-        row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.7).toFixed(2)));
-        row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.6).toFixed(2)));
-        row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.5).toFixed(2)));
-
-
+				
+				for (i = 0.9; i >= 0.5; i=i-0.1)
+					row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.9).toFixed(2)));
 
         $("#moreInfoGrid tbody").append(row);
 
@@ -262,11 +259,14 @@ function updateMoreInfo(redraw, fade) {
 
     var rem = $("<tr/>");
     rem.append($("<td />").text("Remaining"));
-    rem.append($("<td />").text(neededGrade(0, 100 - possible, earned, possible, 0.9).toFixed(2)));
-    rem.append($("<td />").text(neededGrade(0, 100 - possible, earned, possible, 0.8).toFixed(2)));
-    rem.append($("<td />").text(neededGrade(0, 100 - possible, earned, possible, 0.7).toFixed(2)));
-    rem.append($("<td />").text(neededGrade(0, 100 - possible, earned, possible, 0.6).toFixed(2)));
-    rem.append($("<td />").text(neededGrade(0, 100 - possible, earned, possible, 0.5).toFixed(2)));
+		
+		for (i = 0.9; i >= 0.5; i=i-0.1) {
+			if (possible === 100)
+				rem.append($("<td />").text("--"));
+			else
+				rem.append($("<td />").text(neededGrade(0, 100 - possible, earned, possible, 0.9).toFixed(2)));
+		}
+	
     $("#moreInfoGrid tfoot").append(rem);
 
 		var heightNeeded = 30.0; // workaround; should be 0
