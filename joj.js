@@ -10,14 +10,6 @@ var records = [];
 // wire up events
 window.onload = function() {
 		
-		// Save Cookie button
-		var $cookieButton = $("#saveCookie");
-		if (Cookies.enabled) {
-			$cookieButton.on("click", function() {saveCookie()});
-		}
-		else {
-			$cookieButton.css("opacity", "0.2");
-		}
 		
 		// Load table if cookie exists
 		if (Cookies.enabled && Cookies.get("records") !== undefined) {
@@ -217,6 +209,7 @@ function updateGrade() {
             }
         }
     }
+		saveCookie();
 }
 
 // make sure to call updateGrade() first
