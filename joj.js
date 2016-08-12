@@ -9,13 +9,10 @@ var records = [];
 
 // wire up events
 window.onload = function() {
-		
-		
 		// Load table if cookie exists
 		if (Cookies.enabled && Cookies.get("records") !== undefined) {
 			var json_str = Cookies.get("records");
 			records = JSON.parse(json_str);
-			console.log(records);
 			$("#gradesGrid tbody tr").remove();
 			
 			$.each(records, function(rowIndex, r) {
@@ -30,11 +27,17 @@ window.onload = function() {
 				$("#gradesGrid tbody").append(row);
 			});
 			
-			insertRow();
-			insertRow();
-			
 			updateGrade();
-		}
+		} // end cookie
+		
+		$("#clearTable").on("click", function(){
+			records = [];
+			$("#gradesGrid tbody tr").remove();
+			updateGrade();
+			while ($("#gradesGrid tbody tr").length < 5)
+				insertRow();
+			focusFirstCell();
+		});
 		
     var addItem = $("#addItem")[0];
     addItem.onclick = insertRow;
@@ -53,9 +56,8 @@ window.onload = function() {
 
     initEditables(); // makes the spans containing the numbers be able to turn into inputs on focus
 
-		if (!Cookies.enabled)
-			for (var i = 0; i < 3; i++) // add some more rows
-					insertRow();
+		while ($("#gradesGrid tbody tr").length < 5)
+			insertRow();
 
     /*// wire the show name column checkbox
     var showNames = document.getElementById("showNames");
@@ -208,7 +210,9 @@ function updateGrade() {
                 }, 200);
             }
         }
-    }
+    } else {
+			gradeLabel.textContent = "Current grade: 0.00%";
+		}
 		saveCookie();
 }
 
