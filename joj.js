@@ -40,6 +40,9 @@ window.onload = function() {
 			records = [];
 			$("#gradesGrid tbody tr").remove();
 			updateGrade();
+			updateMoreInfo(false, false)
+			while ($("#gradesGrid tbody tr").length < minStartingRows)
+			insertRow();
 			focusFirstCell();
 		});
 		
@@ -117,7 +120,7 @@ function initEditables() {
                 input.size = Math.max(text.length / 2, 2);
 
                 span.parentNode.insertBefore(input, span);
-                input.select();
+                input.select(); // select all text to allow quick changes
 
                 // restore plain text upon input losing focus
                 input.onblur = function() {
@@ -178,13 +181,11 @@ function updateGrade() {
         cells[3].textContent = earned.toFixed(2);
     }
 
-    var grade = (totalEarned * 1.0 / totalWeight * 100); // overall grade
-
-    var displayedGrade = grade.toFixed(2);
+    var displayedGrade = totalEarned.toFixed(2);
     totalEarnedLabel.textContent = totalEarned.toFixed(2);
     totalPossibleLabel.textContent = totalWeight.toFixed(2);
 
-    if (!Number.isNaN(grade)) {
+    if (!Number.isNaN(totalEarned)) {
         gradeLabel.textContent = "Current grade: " + displayedGrade + "%";
         $warningLabel = $("#warningLabel");
 
@@ -251,24 +252,27 @@ function updateMoreInfo(redraw, fade) {
         row.append($("<td />").text(r.name));
 				
 				for (i = 0.9; i >= 0.5; i=i-0.1)
-					row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, 0.9).toFixed(2)));
+					row.append($("<td />").text(neededGrade(r.grade, r.weight, earned, possible, i).toFixed(2)));
 
         $("#moreInfoGrid tbody").append(row);
 
     });
 
+		// Remaining row
     var rem = $("<tr/>");
     rem.append($("<td />").text("Remaining"));
 		
 		for (i = 0.9; i >= 0.5; i=i-0.1) {
-			if (possible === 100)
+			if (possible >= 100)
 				rem.append($("<td />").text("--"));
 			else
-				rem.append($("<td />").text(neededGrade(0, 100 - possible, earned, possible, 0.9).toFixed(2)));
+				rem.append($("<td />").text(neededGrade(0, 100 - possible, earned, possible, i).toFixed(2)));
 		}
 	
     $("#moreInfoGrid tfoot").append(rem);
-
+	
+		// determine the height needed for the more information grid
+		// used for the cool sliding effect
 		var heightNeeded = 30.0; // workaround; should be 0
 		$migw.children().each(function (i, e) {
 			heightNeeded += $(e).outerHeight(true);
@@ -312,6 +316,7 @@ function updateMoreInfo(redraw, fade) {
     }
 }
 
+// determines the grade needed on remaining assignments needed to achieve a desired grade
 function neededGrade(grade, weight, totalEarned, totalPossible, desired) {
     var earned = totalEarned - (grade * weight);
     var possible = totalPossible - weight;
@@ -319,6 +324,7 @@ function neededGrade(grade, weight, totalEarned, totalPossible, desired) {
     return ((desired - earned / 100) / weight) * 10000;
 }
 
+// inserts a row into the gradesGrid
 function insertRow() {
 		var table = $("#mainTable")[0];
 		var nrows = table.rows.length;
@@ -332,16 +338,8 @@ function insertRow() {
 		row.append($("<td />").append(createEditable("0.0")).append("%"));
 		row.append($("<td />").text("0.00"));
 		$("#gradesGrid tbody").append(row);
+		
 		initEditables();
-	
-    /*$("#moreInfoGrid tbody").append
-    var table = document.getElementById("mainTable");
-    var new_row = table.rows[table.rows.length - 3].cloneNode(true); // bad
-    new_row.cells[0].getElementsByTagName("span")[0].textContent = "Assignment " + (table.rows.length - 1);
-    table.getElementsByTagName("tbody")[0].appendChild(new_row);
-    table.getElementsBy
-
-    initEditables(); // wire editables in new row*/
 }
 
 // focuses first cell in gradesGrid
